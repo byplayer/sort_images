@@ -1,3 +1,7 @@
+ENV['BUNDLE_GEMFILE'] = File.join(File.dirname(__FILE__), 'GemFile')
+require "bundler"
+Bundler.setup(:default)
+
 require 'exifr'
 require 'optparse'
 require 'fileutils'
@@ -20,10 +24,15 @@ if(!in_dir || !out_dir)
 end
 
 Dir.glob(File.join(in_dir, '*.jpg')) do |f|
-  mv_dir =
-    File.join(out_dir, EXIFR::JPEG.new(f).date_time_original.strftime('%Y%m%d'))
-  Dir::mkdir(mv_dir) unless File.exists?(mv_dir)
-  FileUtils.cp(f, File.join(mv_dir, File::basename(f)))
-  FileUtils.rm(f)
+  photo_date = EXIFR::JPEG.new(f).date_time_original
+  if photo_date
+    mv_dir =
+      File.join(out_dir, EXIFR::JPEG.new(f).date_time_original.strftime('%Y%m%d'))
+    Dir::mkdir(mv_dir) unless File.exists?(mv_dir)
+    FileUtils.cp(f, File.join(mv_dir, File::basename(f)))
+    FileUtils.rm(f)
+  else
+    puts "no photo date: #{f}"
+  end
 end
 
