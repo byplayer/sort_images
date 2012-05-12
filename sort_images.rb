@@ -28,7 +28,7 @@ Dir.glob(File.join(in_dir, '*.jpg')) do |f|
   if photo_date
     mv_dir =
       File.join(out_dir, EXIFR::JPEG.new(f).date_time_original.strftime('%Y%m%d'))
-    Dir::mkdir(mv_dir) unless File.exists?(mv_dir)
+    FileUtils::mkdir_p(mv_dir) unless File.exists?(mv_dir)
     FileUtils.cp(f, File.join(mv_dir, File::basename(f)))
     FileUtils.rm(f)
   else
