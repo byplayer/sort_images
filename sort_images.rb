@@ -33,10 +33,13 @@ Dir.glob(File.join(in_dir, '*.jpg')) do |f|
     FileUtils::mkdir_p(mv_dir) unless File.exists?(mv_dir)
 
     new_name = photo_date.strftime('%H%M%S_') + File::basename(f)
-    FileUtils.cp(f, File.join(mv_dir, new_name))
+    new_path = File.join(mv_dir, new_name)
+    FileUtils.cp(f, new_path)
 
     # verify
-    unless Digest::MD5.hexdigest(new_name) == Digest::MD5.hexdigest(f)
+    unless Digest::MD5.file(new_path).hexdigest == Digest::MD5.file(f).hexdigest
+      puts Digest::MD5.hexdigest(new_path)
+      puts Digest::MD5.hexdigest(f)
       raise "#{f} move verify error"
     end
     FileUtils.rm(f)
