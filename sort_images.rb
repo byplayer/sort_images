@@ -5,6 +5,8 @@ Bundler.setup(:default)
 require 'exifr'
 require 'optparse'
 require 'fileutils'
+require 'digest/md5'
+
 opt = OptionParser.new
 
 in_dir = nil
@@ -27,9 +29,16 @@ Dir.glob(File.join(in_dir, '*.jpg')) do |f|
   photo_date = EXIFR::JPEG.new(f).date_time_original
   if photo_date
     mv_dir =
-      File.join(out_dir, EXIFR::JPEG.new(f).date_time_original.strftime('%Y%m%d'))
+      File.join(out_dir, photo_date.strftime('%Y%m%d'))
     Dir::mkdir(mv_dir) unless File.exists?(mv_dir)
-    FileUtils.cp(f, File.join(mv_dir, File::basename(f)))
+
+    new_name = photo_date.strftime('%H%M%S_') + File::basename(f)
+    FileUtils.cp(f, File.join(mv_dir, new_name))
+
+    # verify
+    unless Digest::MD5.hexdigest(new_name) == Digest::MD5.hexdigest(f)
+      raise "#{f} move verify error"
+    end
     FileUtils.rm(f)
   else
     puts "no photo date: #{f}"
