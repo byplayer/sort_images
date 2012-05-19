@@ -11,8 +11,10 @@ opt = OptionParser.new
 
 in_dir = nil
 out_dir = nil
+td = nil
 opt.on('-i IN_DIR'){|v| in_dir = v}
 opt.on('-o OUT_DIR'){|v| out_dir = v}
+opt.on('-d [difference in time]'){|v| td = v}
 
 def usage(opt)
   puts opt.help
@@ -25,8 +27,21 @@ if(!in_dir || !out_dir)
   exit(1)
 end
 
+if td
+  unless td =~ /^-?[0-9]{1,2}$/
+    usage(opt)
+    exit(1)
+  end
+end
+
 Dir.glob(File.join(in_dir, '*.jpg')) do |f|
   photo_date = EXIFR::JPEG.new(f).date_time_original
+  if td
+    # puts photo_date
+    photo_date = photo_date + (td.to_i * 60 * 60)
+    # puts photo_date
+  end
+
   if photo_date
     mv_dir =
       File.join(out_dir, photo_date.strftime('%Y%m%d'))
