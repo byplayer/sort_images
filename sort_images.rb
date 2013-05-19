@@ -49,15 +49,19 @@ Dir.glob(File.join(in_dir, '*.jpg')) do |f|
 
     new_name = photo_date.strftime('%H%M%S_') + File::basename(f)
     new_path = File.join(mv_dir, new_name)
-    FileUtils.cp(f, new_path)
+    if File.exist?(new_path)
+      puts "target exist\n  from: #{f}\n  to#{new_path}"
+    else
+      FileUtils.cp(f, new_path)
 
-    # verify
-    unless Digest::MD5.file(new_path).hexdigest == Digest::MD5.file(f).hexdigest
-      puts Digest::MD5.hexdigest(new_path)
-      puts Digest::MD5.hexdigest(f)
-      raise "#{f} move verify error"
+      # verify
+      unless Digest::MD5.file(new_path).hexdigest == Digest::MD5.file(f).hexdigest
+        puts Digest::MD5.hexdigest(new_path)
+        puts Digest::MD5.hexdigest(f)
+        raise "#{f} move verify error"
+      end
+      FileUtils.rm(f)
     end
-    FileUtils.rm(f)
   else
     puts "no photo date: #{f}"
   end
