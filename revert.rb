@@ -35,13 +35,17 @@ Dir.glob(File.join(in_dir, '*.jpg')) do |f|
   if basename =~ /([0-9]{6}_)(.*\.jpg)/i
     new_path = File.join(new_path, $2)
     puts "move to #{new_path}"
-    FileUtils.cp(f, new_path)
-    unless Digest::MD5.file(new_path).hexdigest == Digest::MD5.file(f).hexdigest
-      puts Digest::MD5.hexdigest(new_path)
-      puts Digest::MD5.hexdigest(f)
-      raise "#{f} move verify error"
+    if File.exist?(new_path)
+      puts "target exist\n  from: #{f}\n  to#{new_path}"
+    else
+      FileUtils.cp(f, new_path)
+      unless Digest::MD5.file(new_path).hexdigest == Digest::MD5.file(f).hexdigest
+        puts Digest::MD5.hexdigest(new_path)
+        puts Digest::MD5.hexdigest(f)
+        raise "#{f} move verify error"
+      end
+      FileUtils.rm(f)
     end
-    FileUtils.rm(f)
   else
     puts "sikip #{f}"
   end
